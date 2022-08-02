@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.gupro.de/GXL/gxl-1.0.dtd" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://www.gupro.de/GXL/gxl-1.0.dtd" elementFormDefault="qualified">
+    <!--graph structure -->
+    <xs:element name="attributedElement" type="AttributedElementType" abstract="true"/>
+    <xs:complexType name="AttributedElementType">
+        <xs:attribute name="id" type="xs:ID"/>
+    </xs:complexType>
+    <xs:element name="typedElement" type="TypedElementType" abstract="true"/>
+    <xs:complexType name="TypedElementType">
+        <xs:complexContent>
+            <xs:extension base="AttributedElementType">
+                <xs:sequence>
+                    <xs:element ref="type" minOccurs="0"/>
+                    <xs:element ref="attr" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- gxl -->
+    <xs:element name="gxl" type="GxlType"/>
+    <xs:complexType name="GxlType">
+        <xs:sequence>
+            <xs:element ref="graph" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <!-- type -->
+    <xs:element name="type" type="TypeType"/>
+    <xs:complexType name="TypeType">
+        <xs:anyAttribute namespace="http://www.w3.org/1999/xlink"/>
+    </xs:complexType>
+    <!-- graph -->
+    <xs:element name="graph" type="graphType"/>
+    <xs:complexType name="graphType">
+        <xs:complexContent>
+            <xs:extension base="TypedElementType">
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element ref="node"/>
+                    <xs:element ref="edge"/>
+                    <xs:element ref="rel"/>
+                </xs:choice>
+                <xs:attribute name="role" type="xs:NMTOKEN"/>
+                <xs:attribute name="edgeids" type="xs:boolean" default="false"/>
+                <xs:attribute name="hypergraph" type="xs:boolean" default="false"/>
+                <xs:attribute name="edgemode" type="edgemodeType" default="directed"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:simpleType name="edgemodeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="directed"/>
+            <xs:enumeration value="undirected"/>
+            <xs:enumeration value="defaultdirected"/>
+            <xs:enumeration value="defaultundirected"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- graph elements -->
+    <xs:element name="graphElement" type="GraphElementType" abstract="true"/>
+    <xs:complexType name="GraphElementType">
+        <xs:complexContent>
+            <xs:extension base="TypedElementType">
+                <xs:sequence>
+                    <xs:element ref="graph" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- node -->
+    <xs:element name="node" type="NodeType"/>
+    <xs:complexType name="NodeType">
+        <xs:complexContent>
+            <xs:extension base="GraphElementType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- local connections -->
+    <xs:element name="localConnection" type="LocalConnectionType" abstract="true"/>
+    <xs:complexType name="LocalConnectionType">
+        <xs:complexContent>
+            <xs:extension base="GraphElementType">
+                <xs:attribute name="isDirected" type="xs:boolean"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="edge" type="EdgeType"/>
+    <xs:complexType name="EdgeType">
+        <xs:complexContent>
+            <xs:extension base="LocalConnectionType">
+                <xs:attribute name="from" type="xs:IDREF" use="required"/>
+                <xs:attribute name="to" type="xs:IDREF" use="required"/>
+                <xs:attribute name="fromorder" type="xs:integer"/>
+                <xs:attribute name="toorder" type="xs:integer"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="rel" type="RelType"/>
+    <xs:complexType name="RelType">
+        <xs:complexContent>
+            <xs:extension base="LocalConnectionType">
+                <xs:sequence>
+                    <xs:element ref="relend" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- relend -->
+    <xs:element name="relend" type="RelendType"/>
+    <xs:complexType name="RelendType">
+        <xs:complexContent>
+            <xs:extension base="AttributedElementType">
+                <xs:attribute name="target" type="xs:IDREF" use="required"/>
+                <xs:attribute name="role" type="xs:NMTOKEN"/>
+                <xs:attribute name="direction" type="directionType"/>
+                <xs:attribute name="startorder" type="xs:integer"/>
+                <xs:attribute name="endorder" type="xs:integer"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:simpleType name="directionType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="in"/>
+            <xs:enumeration value="out"/>
+            <xs:enumeration value="none"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- attribute -->
+    <xs:element name="attr" type="AttrType"/>
+    <xs:complexType name="AttrType">
+        <xs:complexContent>
+            <xs:extension base="AttributedElementType">
+                <xs:group ref="value"/>
+                <xs:attribute name="name" type="xs:string" use="required"/>
+                <xs:attribute name="kind" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- value -->
+    <xs:group name="value">
+        <xs:choice>
+            <xs:element ref="bag"/>
+            <xs:element ref="set"/>
+            <xs:element ref="seq"/>
+            <xs:element ref="tup"/>
+            <xs:element ref="bool"/>
+            <xs:element ref="int"/>
+            <xs:element ref="float"/>
+            <xs:element ref="string"/>
+            <xs:element ref="locator"/>
+            <xs:element ref="enum"/>
+        </xs:choice>
+    </xs:group>
+    <!-- locator -->
+    <xs:element name="locator" type="LocatorType"/>
+    <xs:complexType name="LocatorType">
+        <xs:anyAttribute namespace="http://www.w3.org/1999/xlink"/>
+    </xs:complexType>
+    <!-- atomic values -->
+    <xs:element name="bool" type="xs:boolean"/>
+    <xs:element name="int" type="xs:integer"/>
+    <xs:element name="float" type="xs:float"/>
+    <xs:element name="string" type="xs:string"/>
+    <xs:element name="freeType" type="xs:string"/>
+    <!-- enumeration -->
+    <xs:element name="enum" type="xs:string"/>
+    <!-- composite values -->
+    <xs:element name="compositeValue" type="CompositeValueType" abstract="true"/>
+    <xs:complexType name="CompositeValueType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:group ref="value"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="bag" type="BagType"/>
+    <xs:complexType name="BagType">
+        <xs:complexContent>
+            <xs:extension base="CompositeValueType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="set" type="SetType"/>
+    <xs:complexType name="SetType">
+        <xs:complexContent>
+            <xs:extension base="CompositeValueType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="seq" type="SeqType"/>
+    <xs:complexType name="SeqType">
+        <xs:complexContent>
+            <xs:extension base="CompositeValueType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="tup" type="TupType"/>
+    <xs:complexType name="TupType">
+        <xs:complexContent>
+            <xs:extension base="CompositeValueType"/>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>
